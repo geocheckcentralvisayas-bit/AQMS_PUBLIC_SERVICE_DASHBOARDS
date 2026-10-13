@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PUBLIC SERVICE ADVISORY GENERATOR — DENR-EMB Central Visayas AQMS</title>
+<style>
+    :root{--navy:#063967;--blue:#087cc1;--teal:#1fa88a;--purple:#6f3fb5;--green:#20a66a;--yellow:#f7c928;--red:#eb4b4b;--ink:#17324d;--muted:#60778b;--bg:#f3f8fc;--line:#d7e7f2}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:12px "Segoe UI",Arial,sans-serif}
+    .hero{color:#fff;background:linear-gradient(90deg,#034d82e8,#066daaa8),radial-gradient(circle at 20% 20%,#0a86c9,#05345e);background-size:cover}
+    .brand{min-height:104px;display:flex;align-items:center;gap:16px;padding:15px 28px;flex-wrap:wrap}
+    .brand img{width:96px;height:74px;object-fit:contain;background:#fff0;border-radius:6px}
+    .brand h1{margin:0;font-size:24px}
+    .brand p{margin:4px 0;font-size:13px;font-weight:700}
+    .brand small{font-size:11px}
+    .tagline{margin-left:auto;text-align:right;font-style:italic;font-weight:700;font-size:13px;max-width:340px}
+    .nav{min-height:44px;background:#05345e;display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap;color:#cfe6f7;font-weight:700}
+    .nav a{color:#fff;text-decoration:none;padding:8px 14px;border-radius:5px;background:#118fe0}
+    .nav span.status{margin-left:auto;font-weight:800;color:#8fe6bd}
+    main{max-width:1500px;margin:auto;padding:14px;display:grid;gap:12px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:7px;padding:12px;box-shadow:0 2px 8px #2b66821c;min-width:0}
+    .title{color:#12507f;font-weight:800;font-size:13px;text-transform:uppercase;border-bottom:1px solid #e6f0f6;padding-bottom:9px;margin-bottom:10px}
+    .eyebrow{color:#42627b;font-size:10px;font-weight:800;text-transform:uppercase}
+    .hint{color:var(--muted);font-size:10px}
+    .no-data{color:var(--muted);font-weight:700}
+
+    .reports-header{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap}
+    .reports-header h2{margin:0;color:var(--navy);font-size:24px}
+    .reports-header p{margin:5px 0 0;color:var(--muted)}
+    .reports-live{color:var(--green);font-weight:800;white-space:nowrap}
+
+    .advisory-controls{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:10px;align-items:end}
+    .advisory-controls label{display:grid;gap:5px;color:#42627b;font-size:10px;font-weight:800}
+    .advisory-controls select,.advisory-controls input,.advisory-controls button{height:36px;border:1px solid #cfe0ee;border-radius:6px;background:#fff;color:var(--ink);padding:0 10px;font:inherit}
+
+    .advisory-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .advisory-actions button{min-height:40px;margin:0;padding:0 18px;border:1px solid transparent;border-radius:6px;color:#fff;font:600 12px "Segoe UI",Arial,sans-serif;letter-spacing:.01em;cursor:pointer;box-shadow:0 2px 5px rgba(23,50,77,.14)}
+    #advisory-generate{background:var(--blue);border-color:#0870ae}
+    #advisory-download{background:var(--teal);border-color:#198e76}
+    .advisory-actions button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.06);box-shadow:0 5px 12px rgba(23,50,77,.18)}
+    .advisory-actions button:active:not(:disabled){transform:translateY(1px);box-shadow:0 1px 3px rgba(23,50,77,.16)}
+    .advisory-actions button:focus-visible{outline:3px solid rgba(8,124,193,.24);outline-offset:2px}
+    .advisory-actions button:disabled{cursor:not-allowed;opacity:.55;box-shadow:none}
+
+    .advisory-admin-status{display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--muted);font-size:10px;font-weight:700}
+    .advisory-admin-status button{height:auto;padding:0;border:0;background:transparent;color:var(--blue);font:700 10px "Segoe UI",Arial,sans-serif;cursor:pointer}
+
+    .advisory-preview{display:grid;grid-template-columns:minmax(320px,540px) minmax(300px,1fr);gap:16px;align-items:stretch;width:100%;min-width:0}
+    .advisory-preview>*{width:100%;min-width:0}
+    .advisory-preview-frame{padding:10px;background:#eaf3f8;border:1px solid var(--line);border-radius:8px;text-align:center;user-select:none;-webkit-user-select:none}
+    .advisory-preview-frame img{display:block;width:100%;max-width:540px;height:auto;margin:auto;box-shadow:0 6px 20px #17324d35;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+    .advisory-empty{color:var(--muted);font-weight:700;padding:40px 12px;line-height:1.6}
+    .advisory-error{color:#b13838}
+    .advisory-error small{display:block;margin-top:8px;color:var(--muted);font-weight:600}
+
+    .advisory-summary-report{height:100%;max-height:100%;overflow:auto;padding:14px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px #17324d1c;color:#35536b}
+    .advisory-summary-report h3{margin:0 0 12px;color:var(--navy);font-size:16px}
+    .advisory-summary-section{padding:10px 0;border-top:1px solid var(--line)}
+    .advisory-summary-section:first-of-type{border-top:0;padding-top:0}
+    .advisory-summary-section h4{margin:0 0 8px;color:#42627b;font-size:10px;letter-spacing:.05em}
+    .advisory-summary-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .advisory-summary-meta div{padding:7px 8px;background:#f7fbfe;border-radius:5px;font-size:10px;overflow-wrap:anywhere}
+    .advisory-summary-meta strong{display:block;color:#42627b;font-size:8px;text-transform:uppercase;margin-bottom:2px}
+    .advisory-summary-status{padding:10px;border-radius:6px;color:#fff;background:#60778b}
+    .advisory-summary-status strong{display:block;font-size:24px;line-height:1.1}
+    .advisory-summary-status span{display:block;margin-top:4px;font-size:11px;font-weight:800}
+    .advisory-summary-text{margin:0;font-size:11px;line-height:1.45}
+    .advisory-summary-stats{width:100%;border-collapse:collapse;font-size:10px}
+    .advisory-summary-stats td{padding:5px 6px;border-bottom:1px solid var(--line)}
+    .advisory-summary-stats td:last-child{text-align:right;font-weight:800;color:var(--navy)}
+    .advisory-summary-legend{display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;font-size:9px}
+    .advisory-summary-legend span{display:flex;align-items:center;gap:5px}
+    .advisory-summary-legend i{width:10px;height:10px;flex:0 0 10px;border-radius:50%}
+    .advisory-summary-source{font-size:10px;line-height:1.4;margin:0}
+    .advisory-summary-system{font-size:10px;font-weight:800;color:var(--green);line-height:1.6}
+
+    .advisory-log-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .advisory-log-actions button{min-height:34px;padding:0 14px;border:1px solid #cfe0ee;border-radius:6px;background:#fff;color:var(--ink);font:700 11px "Segoe UI",Arial,sans-serif;cursor:pointer}
+    .advisory-log-actions button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .advisory-log-actions button:disabled{opacity:.55;cursor:not-allowed}
+    .advisory-log-table-wrap{overflow:auto}
+    .advisory-log-table{width:100%;border-collapse:collapse;min-width:760px;font-size:11px}
+    .advisory-log-table th{background:var(--navy);color:#fff;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:8px}
+    .advisory-log-table td{padding:7px 8px;border-bottom:1px solid var(--line);color:#35536b}
+    .advisory-log-table tr:nth-child(even) td{background:#f7fbfe}
+
+    .aqms-admin-modal{display:none;position:fixed;inset:0;z-index:1000;background:#063967b8;padding:20px;place-items:center}
+    .aqms-admin-modal.open{display:grid}
+    .aqms-admin-content{position:relative;width:min(420px,100%);background:#fff;border-radius:8px;box-shadow:0 12px 35px #17324d55;padding:24px}
+    .aqms-admin-content h2{margin:0 0 6px;color:var(--navy);font-size:20px}
+    .aqms-admin-content p{margin:0 0 16px;color:var(--muted);line-height:1.45}
+    .aqms-admin-close{position:absolute;top:8px;right:12px;border:0;background:transparent;color:var(--muted);font-size:26px;cursor:pointer}
+    .aqms-admin-form{display:grid;gap:10px}
+    .aqms-admin-form label{display:grid;gap:5px;color:#42627b;font-size:10px;font-weight:800}
+    .aqms-admin-form input{height:38px;border:1px solid #cfe0ee;border-radius:6px;padding:0 10px;color:var(--ink);font:inherit}
+    .aqms-admin-form button{height:38px;border:0;border-radius:6px;background:var(--blue);color:#fff;font:700 12px "Segoe UI",Arial,sans-serif;cursor:pointer}
+    .aqms-admin-error{min-height:16px;color:#b13838;font-size:11px;font-weight:700}
+
+    @media(max-width:950px){.advisory-controls{grid-template-columns:repeat(3,1fr)}.advisory-preview{grid-template-columns:1fr}}
+    @media(max-width:620px){.advisory-controls{grid-template-columns:1fr}.advisory-summary-meta,.advisory-summary-legend{grid-template-columns:1fr}.advisory-actions{align-items:stretch}.advisory-actions button{flex:1 1 220px;min-height:44px}}
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="brand">
+      <img src="DENR LOGO.png" alt="DENR logo">
+      <div>
+        <h1>PUBLIC SERVICE ADVISORY GENERATOR</h1>
+        <p>DENR-EMB Central Visayas — Air Quality Monitoring System</p>
+        <small>Standalone report tool · Continuous Monitoring data source only</small>
+      </div>
+      <div class="tagline">Clean Air Today, Brighter Tomorrow</div>
+    </div>
+  </header>
+  <nav class="nav">
+    <a href="#advisory-controls">Advisory Generator</a>
+    <a href="#advisory-preview">Preview</a>
+    <a href="#advisory-summary-report">Summary Report</a>
+    <a href="#advisory-log">Generation Log</a>
+    <span class="status" id="nav-source-status">● CONNECTING…</span>
+  </nav>
+  <main>
+    <section class="card reports-header">
+      <div>
+        <div class="eyebrow">DENR-EMB Central Visayas</div>
+        <h2>PUBLIC SERVICE ADVISORY GENERATOR</h2>
+        <p>Generate a shareable air quality advisory from the latest Continuous Monitoring data.</p>
+      </div>
+      <div class="reports-live" id="reports-live-status">● WAITING FOR DATA</div>
+    </section>
+
+    <section class="card" id="advisory-controls">
+      <div class="title">CONTINUOUS MONITORING ONLY</div>
+      <div class="advisory-controls">
+        <label>MONITORING STATION<select id="advisory-station" aria-label="Continuous Monitoring station"></select></label>
+        <label>PARAMETER<select id="advisory-parameter" aria-label="Continuous Monitoring parameter"><option value="pm25">PM2.5</option><option value="pm10">PM10</option></select></label>
+        <label>TREND PERIOD<select id="advisory-period" aria-label="Advisory trend period"><option value="24">24 HOURS</option><option value="3">3 DAYS</option><option value="7">7 DAYS</option></select></label>
+        <label>AQI GRAPH RANGE<select id="advisory-graph-range" aria-label="Advisory graph AQI maximum"><option value="100">100</option><option value="150">150</option><option value="200">200</option><option value="250">250</option><option value="300">300</option><option value="500" selected>500</option><option value="custom">CUSTOM</option></select><input id="advisory-graph-range-custom" type="number" min="50" max="500" step="1" inputmode="numeric" placeholder="50–500" aria-label="Custom advisory graph AQI maximum" hidden></label>
+        <label>START DATE / TIME<input id="advisory-start" type="datetime-local" aria-label="Advisory start date and time"></label>
+        <label>END DATE / TIME<input id="advisory-end" type="datetime-local" aria-label="Advisory end date and time"></label>
+      </div>
+      <div class="advisory-actions">
+        <button type="button" id="advisory-generate">GENERATE PUBLIC SERVICE ADVISORY</button>
+        <button type="button" id="advisory-download" disabled>DOWNLOAD PUBLIC SERVICE ADVISORY</button>
+      </div>
+      <div class="advisory-admin-status" id="advisory-admin-status" aria-live="polite">🔒 Administrator login required to download <button type="button" id="advisory-admin-login">LOG IN</button></div>
+      <div class="hint" style="margin-top:8px">Data source: Google Sheets live records — sheets “Talisay City” and “City of Toledo”. Auto-refresh every 5 seconds.</div>
+    </section>
+
+    <section class="card" id="advisory-preview">
+      <div class="title">PUBLIC SERVICE ADVISORY PREVIEW</div>
+      <div class="advisory-preview">
+        <div id="advisory-preview-frame" class="advisory-preview-frame"><div class="advisory-empty">Select a Continuous Monitoring station to begin.</div></div>
+        <aside class="advisory-summary-report" id="advisory-summary-report" aria-labelledby="advisory-summary-title">
+          <h3 id="advisory-summary-title">ADVISORY SUMMARY REPORT</h3>
+          <section class="advisory-summary-section"><h4>REPORT INFORMATION</h4><div class="advisory-summary-meta"><div><strong>Monitoring Station</strong><span id="summary-report-station">—</span></div><div><strong>Parameter</strong><span id="summary-report-parameter">—</span></div><div><strong>Trend Period</strong><span id="summary-report-period">—</span></div><div><strong>Date Range</strong><span id="summary-report-date-range">—</span></div><div><strong>Generated Timestamp</strong><span id="summary-report-generated">—</span></div></div></section>
+          <section class="advisory-summary-section"><h4>CURRENT AQI STATUS</h4><div class="advisory-summary-status" id="summary-report-status"><strong id="summary-report-aqi">—</strong><span id="summary-report-category">No current observation</span></div></section>
+          <section class="advisory-summary-section"><h4>OBSERVATION SUMMARY</h4><p class="advisory-summary-text" id="summary-report-observation">No current observations are available.</p></section>
+          <section class="advisory-summary-section"><h4>DATA STATISTICS</h4><table class="advisory-summary-stats"><tbody><tr><td>Total Records</td><td id="summary-report-total">—</td></tr><tr><td>Minimum AQI</td><td id="summary-report-min">—</td></tr><tr><td>Maximum AQI</td><td id="summary-report-max">—</td></tr><tr><td>Average AQI</td><td id="summary-report-average">—</td></tr><tr><td>Latest AQI</td><td id="summary-report-latest">—</td></tr></tbody></table></section>
+          <section class="advisory-summary-section"><h4>AQI CATEGORY LEGEND</h4><div class="advisory-summary-legend"><span><i style="background:#00B050"></i>GOOD</span><span><i style="background:#FFFF00"></i>FAIR</span><span><i style="background:#F4A142"></i>UNHEALTHY FOR SENSITIVE GROUPS</span><span><i style="background:#FF6600"></i>UNHEALTHY</span><span><i style="background:#FF0000"></i>VERY UNHEALTHY</span><span><i style="background:#AE28C5"></i>ACUTELY UNHEALTHY</span><span><i style="background:#7A0000"></i>EMERGENCY</span></div></section>
+          <section class="advisory-summary-section"><h4>REPORT SOURCE</h4><p class="advisory-summary-source" id="summary-report-source">Only actual PM2.5 and PM10 observations from Continuous Monitoring Stations are included. Manual LGU, TSP, and Manual PM10 observations are excluded.</p></section>
+          <section class="advisory-summary-section"><h4>SYSTEM STATUS</h4><div class="advisory-summary-system" id="summary-report-system">LIVE AQMS DATA<br>AUTO REFRESH ENABLED</div></section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="card" id="advisory-log">
+      <div class="title">ADVISORY GENERATION LOG <span class="hint" id="advisory-log-count"></span></div>
+      <div class="advisory-log-actions">
+        <button type="button" class="primary" id="advisory-log-download" disabled>DOWNLOAD ADVISORY LOG 🔒</button>
+        <button type="button" id="advisory-log-clear">CLEAR LOG</button>
+      </div>
+      <div class="advisory-log-table-wrap">
+        <table class="advisory-log-table">
+          <thead><tr><th>#</th><th>Generated</th><th>Station</th><th>Parameter</th><th>Trend Period</th><th>Latest AQI</th><th>Category</th><th>Records</th><th>Downloaded</th></tr></thead>
+          <tbody id="advisory-log-body"><tr><td colspan="9" class="no-data">No advisories generated yet in this session.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="aqms-admin-modal" id="aqms-admin-modal" role="dialog" aria-modal="true" aria-labelledby="aqms-admin-title" aria-hidden="true">
+    <div class="aqms-admin-content" role="document">
+      <button class="aqms-admin-close" id="aqms-admin-close" type="button" aria-label="Close administrator login">×</button>
+      <h2 id="aqms-admin-title">Administrator Download Login</h2>
+      <p>Public Service Advisory previews are public. Only the administrator session can download the generated image and the advisory log.</p>
+      <form class="aqms-admin-form" id="aqms-admin-form">
+        <label>USERNAME<input id="aqms-admin-username" name="username" autocomplete="username" required></label>
+        <label>PASSWORD<input id="aqms-admin-password" name="password" type="password" autocomplete="current-password" required></label>
+        <div class="aqms-admin-error" id="aqms-admin-error" role="alert"></div>
+        <button type="submit">LOG IN</button>
+      </form>
+    </div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ------------------------------------------------------------------ *
+   *  DATA SOURCE (same live Google Sheets source as the main AQMS app)  *
+   * ------------------------------------------------------------------ */
+  const SPREADSHEET_ID = "1Fh6w15beHCAHPGJw-2nfwNryez3vwnSVCd8bsFGKvHE";
+  const spreadsheetBase = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+  const continuousSheets = [["talisay", "Talisay City"], ["toledo", "City of Toledo"]];
+  const REFRESH_INTERVAL = 5000;
+
+  /* ------------------------------------------------------------------ *
+   *  AQI CATEGORY MODEL                                                  *
+   * ------------------------------------------------------------------ */
+  const aqiCategories = [
+    {name: "GOOD", range: "1–50", min: 1, max: 50, color: "#2dcc8a", className: "good"},
+    {name: "FAIR", range: "51–100", min: 51, max: 100, color: "#f5d447", className: "fair"},
+    {name: "UNHEALTHY FOR SENSITIVE GROUPS", range: "101–150", min: 101, max: 150, color: "#ff963e", className: "sensitive"},
+    {name: "VERY UNHEALTHY", range: "151–200", min: 151, max: 200, color: "#f14b52", className: "very-unhealthy"},
+    {name: "ACUTELY UNHEALTHY", range: "201–300", min: 201, max: 300, color: "#AE28C5", className: "acute"},
+    {name: "EMERGENCY", range: "301–500", min: 301, max: 500, color: "#6b3434", className: "emergency"}
+  ];
+
+  const dataText = value => String(value ?? "").trim();
+  const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+  const toDateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const formatPollutant = key => key === "pm25" ? "PM2.5" : "PM10";
+
+  function parseCsv(csv) {
+    const rows = [];
+    let row = [], field = "", quoted = false;
+    for (let index = 0; index < csv.length; index += 1) {
+      const character = csv[index];
+      if (character === '"') {
+        if (quoted && csv[index + 1] === '"') { field += '"'; index += 1; }
+        else { quoted = !quoted; }
+      } else if (character === "," && !quoted) {
+        row.push(field.trim()); field = "";
+      } else if ((character === "\n" || character === "\r") && !quoted) {
+        if (character === "\r" && csv[index + 1] === "\n") index += 1;
+        row.push(field.trim());
+        if (row.some(value => value)) rows.push(row);
+        row = []; field = "";
+      } else { field += character; }
+    }
+    if (field || row.length) { row.push(field.trim()); if (row.some(value => value)) rows.push(row); }
+    return rows;
+  }
+
+  function normalizeRecords(csv) {
+    const rows = parseCsv(csv);
+    if (rows.length < 2) throw new Error("The Google Sheet does not contain measurement data.");
+    const headers = rows[0].map(header => header.toLowerCase().replace(/[^a-z0-9]/g, ""));
+    const column = name => headers.indexOf(name);
+    const stationColumn = column("station");
+    const cityColumn = column("city");
+    const dateColumn = headers.indexOf("samplingdate") >= 0 ? column("samplingdate") : column("sampingdate");
+    const hourColumn = column("hour");
+    const pm25Column = column("pm25");
+    const pm10Column = column("pm10");
+    const remarks25Column = headers.indexOf("remarks25") >= 0 ? column("remarks25") : column("remakrs25");
+    const remarks10Column = headers.indexOf("remarkspm10") >= 0 ? column("remarkspm10") : column("remarks10");
+    if ([stationColumn, cityColumn, dateColumn, hourColumn, pm25Column, pm10Column].some(value => value < 0)) {
+      throw new Error("The Google Sheet is missing one or more required air-quality columns.");
+    }
+    return rows.slice(1).map((row, rowIndex) => {
+      const date = new Date(`${row[dateColumn]} ${row[hourColumn]}`);
+      const validDate = !Number.isNaN(date.getTime());
+      const pm25Text = row[pm25Column].trim();
+      const pm10Text = row[pm10Column].trim();
+      return {
+        sourceOrder: rowIndex,
+        station: row[stationColumn],
+        city: row[cityColumn],
+        dateText: row[dateColumn].trim(),
+        timeText: row[hourColumn].trim(),
+        dateKey: validDate ? toDateKey(date) : "",
+        timestamp: validDate ? date.toISOString() : "",
+        pm25Text, pm10Text,
+        pm25: pm25Text === "" ? NaN : Number(pm25Text),
+        pm10: pm10Text === "" ? NaN : Number(pm10Text),
+        remarks25: remarks25Column >= 0 ? row[remarks25Column].trim() : "",
+        remarks10: remarks10Column >= 0 ? row[remarks10Column].trim() : ""
+      };
+    }).filter(item => item.pm25Text || item.pm10Text || item.remarks25 || item.remarks10);
+  }
+
+  function categoryForValue(value) {
+    if (!Number.isFinite(value) || value < 1) return null;
+    return aqiCategories.find(category => value >= category.min && value <= category.max)
+      || (value > 500 ? {name: "Above Emergency", range: ">500", color: "#4a2323", className: "emergency"} : null);
+  }
+
+  function normalizeAqiRemark(remark) {
+    const normalized = dataText(remark).toLowerCase().replace(/\s+/g, " ");
+    if (!normalized) return "";
+    if (normalized.includes("emergency")) return "EMERGENCY";
+    if (normalized.includes("acutely unhealthy")) return "ACUTELY UNHEALTHY";
+    if (normalized.includes("unhealthy for sensitive group") || (normalized.includes("unhealty") && normalized.includes("sensitive"))) return "UNHEALTHY FOR SENSITIVE GROUPS";
+    if (normalized.includes("very unhealthy")) return "VERY UNHEALTHY";
+    if (normalized.includes("unhealty")) return "VERY UNHEALTHY";
+    if (normalized.includes("unhealthy")) return "VERY UNHEALTHY";
+    if (normalized.includes("moderate") || normalized.includes("fair")) return "FAIR";
+    if (normalized.includes("good")) return "GOOD";
+    return dataText(remark);
+  }
+
+  function getStationDisplayTitle(stationName) {
+    switch (dataText(stationName)) {
+      case "Talisay Station": return "METRO CEBU AMBIENT AIR QUALITY MONITORING STATION";
+      case "Toledo Station": return "CAAMS BRGY. CABITOONAN, TOLEDO CITY, STATION";
+      default: return dataText(stationName).toUpperCase();
+    }
+  }
+  const getParameterTitle = parameter => dataText(parameter).toLowerCase() === "pm25" ? "PM2.5" : dataText(parameter).toUpperCase();
+
+  /* ------------------------------------------------------------------ *
+   *  LIVE DATA                                                           *
+   * ------------------------------------------------------------------ */
+  let liveRecords = {};
+  let isRefreshing = false;
+  let lastSuccessfulAt = null;
+
+  const advisoryRecords = () => Object.values(liveRecords).flat().filter(item => item && item.station && item.timestamp);
+
+  async function fetchSheet(sheetName) {
+    const response = await fetch(`${spreadsheetBase}${encodeURIComponent(sheetName)}&t=${Date.now()}`, {cache: "no-store"});
+    if (!response.ok) throw new Error(`Unable to load ${sheetName} measurements.`);
+    return normalizeRecords(await response.text());
+  }
+
+  const reportsLive = document.getElementById("reports-live-status");
+  const navStatus = document.getElementById("nav-source-status");
+  const summarySystem = document.getElementById("summary-report-system");
+
+  function setLiveStatus(connected, timestamp) {
+    reportsLive.textContent = connected
+      ? `● LIVE · ${new Set(advisoryRecords().map(item => item.station)).size} CONTINUOUS STATIONS · Auto-refresh: 5s`
+      : "● CONNECTION ISSUE";
+    reportsLive.style.color = connected ? "var(--green)" : "#d24b4b";
+    navStatus.textContent = connected ? "● LIVE DATA SOURCE CONNECTED" : "● DATA SOURCE UNAVAILABLE";
+    navStatus.style.color = connected ? "#8fe6bd" : "#ffb3b3";
+    summarySystem.innerHTML = connected
+      ? `LIVE AQMS DATA<br>AUTO REFRESH ENABLED${timestamp ? `<br><span style="color:#60778b">UPDATED ${timestamp.toLocaleTimeString([], {hour: "numeric", minute: "2-digit", second: "2-digit"})}</span>` : ""}`
+      : `DATA SOURCE UNAVAILABLE<br><span style="color:#b13838">LAST SUCCESS: ${lastSuccessfulAt ? lastSuccessfulAt.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"}) : "NONE"}</span>`;
+  }
+
+  async function refreshLiveData() {
+    if (isRefreshing) return false;
+    isRefreshing = true;
+    try {
+      const fetched = await Promise.all(continuousSheets.map(([key, sheet]) => fetchSheet(sheet).then(records => [key, records])));
+      const nextRecords = Object.fromEntries(fetched);
+      liveRecords = nextRecords;
+      lastSuccessfulAt = new Date();
+      setLiveStatus(true, lastSuccessfulAt);
+      refreshAdvisoryControls();
+      return true;
+    } catch (error) {
+      setLiveStatus(false, lastSuccessfulAt);
+      console.warn("[Advisory generator] data source error:", error.message);
+      if (!advisoryStation.value) {
+        document.getElementById("advisory-preview-frame").innerHTML = `<div class="advisory-empty advisory-error">NO CONTINUOUS MONITORING DATA AVAILABLE<br><small>${escapeHtml(error.message)}</small></div>`;
+      }
+      return false;
+    } finally {
+      isRefreshing = false;
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   *  ADVISORY CONTROLS                                                   *
+   * ------------------------------------------------------------------ */
+  const advisoryStation = document.getElementById("advisory-station");
+  const advisoryParameter = document.getElementById("advisory-parameter");
+  const advisoryPeriod = document.getElementById("advisory-period");
+  const advisoryGraphRange = document.getElementById("advisory-graph-range");
+  const advisoryGraphRangeCustom = document.getElementById("advisory-graph-range-custom");
+  const advisoryStart = document.getElementById("advisory-start");
+  const advisoryEnd = document.getElementById("advisory-end");
+  const advisoryPreview = document.getElementById("advisory-preview-frame");
+  const advisoryDownload = document.getElementById("advisory-download");
+  let advisoryCanvas = null;
+  let advisoryRenderSequence = 0;
+  let currentAdvisoryStats = null;
+
+  const advisoryDateInput = date => {
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+  };
+  const advisorySelectedRecords = () => {
+    const stationName = advisoryStation.value;
+    const parameter = advisoryParameter.value;
+    const endValue = advisoryEnd.value ? new Date(advisoryEnd.value).getTime() : Infinity;
+    const startValue = advisoryStart.value ? new Date(advisoryStart.value).getTime() : -Infinity;
+    return advisoryRecords().filter(item => item.station === stationName && Number.isFinite(item[parameter]) && item[parameter] >= 1 && new Date(item.timestamp).getTime() >= startValue && new Date(item.timestamp).getTime() <= endValue)
+      .sort((first, second) => new Date(first.timestamp) - new Date(second.timestamp) || first.sourceOrder - second.sourceOrder);
+  };
+  const advisoryFormatFilterDate = value => new Date(value).toLocaleDateString([], {year: "numeric", month: "long", day: "numeric"}).toUpperCase();
+
+  const advisoryFilterLabel = points => {
+    const latest = points.at(-1);
+    if (!latest) return "DATE UNAVAILABLE";
+    const selectedStart = advisoryStart.value ? new Date(advisoryStart.value).getTime() : NaN;
+    const selectedEnd = advisoryEnd.value ? new Date(advisoryEnd.value).getTime() : NaN;
+    const isSingleDayFilter = Number.isFinite(selectedStart) && Number.isFinite(selectedEnd)
+      ? selectedEnd - selectedStart <= 24 * 60 * 60 * 1000
+      : advisoryPeriod.value === "24";
+    if (isSingleDayFilter) {
+      const latestDate = new Date(latest.timestamp);
+      const date = advisoryFormatFilterDate(latestDate);
+      const time = latest.timeText ? latestDate.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"}).toUpperCase() : "TIME UNAVAILABLE";
+      return `AS OF ${date} | ${time}`;
+    }
+    const start = advisoryStart.value ? advisoryFormatFilterDate(advisoryStart.value) : advisoryFormatFilterDate(points[0].timestamp);
+    const end = advisoryEnd.value ? advisoryFormatFilterDate(advisoryEnd.value) : advisoryFormatFilterDate(latest.timestamp);
+    return `${start} - ${end}`;
+  };
+
+  const advisoryText = (context, text, x, y, maxWidth, lineHeight) => {
+    const words = String(text || "").split(/\s+/);
+    let line = "", currentY = y;
+    words.forEach(word => {
+      const test = line ? `${line} ${word}` : word;
+      if (context.measureText(test).width > maxWidth && line) { context.fillText(line, x, currentY); line = word; currentY += lineHeight; }
+      else line = test;
+    });
+    if (line) context.fillText(line, x, currentY);
+    return currentY;
+  };
+
+  const advisorySummaryCategoryColors = {
+    GOOD: "#00B050", FAIR: "#FFFF00", "UNHEALTHY FOR SENSITIVE GROUPS": "#F4A142", UNHEALTHY: "#FF6600",
+    "VERY UNHEALTHY": "#FF0000", "ACUTELY UNHEALTHY": "#AE28C5", EMERGENCY: "#7A0000"
+  };
+  const advisoryPreviewCategoryColors = {
+    GOOD: "#8FE610", FAIR: "#FBFF37", "UNHEALTHY FOR SENSITIVE GROUPS": "#F9A72B", "VERY UNHEALTHY": "#AC0B09",
+    "ACUTELY UNHEALTHY": "#AE28C5", EMERGENCY: "#7A2F00"
+  };
+  const advisoryPreviewCategoryColor = category => advisoryPreviewCategoryColors[category?.name] || category?.color || "#60778b";
+  const advisoryPreviewCategoryFontColor = category => category?.name === "FAIR" ? "#1E293B" : "#FFFFFF";
+
+  const advisoryGraphMaximum = () => {
+    const selected = advisoryGraphRange.value === "custom" ? Number(advisoryGraphRangeCustom.value) : Number(advisoryGraphRange.value);
+    return Number.isFinite(selected) && selected >= 50 && selected <= 500 ? selected : 500;
+  };
+  function updateAdvisoryGraphRangeInput() {
+    const custom = advisoryGraphRange.value === "custom";
+    advisoryGraphRangeCustom.hidden = !custom;
+    advisoryGraphRangeCustom.required = custom;
+    const value = Number(advisoryGraphRangeCustom.value);
+    advisoryGraphRangeCustom.setCustomValidity(custom && (!Number.isFinite(value) || value < 50 || value > 500) ? "Enter a graph maximum from 50 to 500." : "");
+  }
+
+  function updateAdvisorySummary(points, latest, category, selectedStation, parameter, filterLabel) {
+    const setSummaryText = (id, value) => { const element = document.getElementById(id); if (element) element.textContent = value; };
+    const parameterTitle = getParameterTitle(parameter);
+    const periodLabel = advisoryPeriod.options[advisoryPeriod.selectedIndex]?.textContent || "SELECTED PERIOD";
+    setSummaryText("summary-report-station", selectedStation || "—");
+    setSummaryText("summary-report-parameter", parameterTitle || "—");
+    setSummaryText("summary-report-period", periodLabel);
+    setSummaryText("summary-report-date-range", filterLabel || "—");
+    setSummaryText("summary-report-generated", new Date().toLocaleString([], {year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", second: "2-digit"}));
+    const status = document.getElementById("summary-report-status");
+    const categoryName = category?.name || "No current observation";
+    status.style.background = category ? advisorySummaryCategoryColors[categoryName] || "#60778b" : "#60778b";
+    status.style.color = "#fff";
+    setSummaryText("summary-report-aqi", latest ? String(latest[parameter]) : "—");
+    setSummaryText("summary-report-category", categoryName);
+    if (!points.length || !latest) {
+      setSummaryText("summary-report-observation", "No current observations are available for the selected monitoring period.");
+      ["summary-report-total", "summary-report-min", "summary-report-max", "summary-report-average", "summary-report-latest"].forEach(id => setSummaryText(id, "—"));
+      return;
+    }
+    const values = points.map(item => Number(item[parameter])).filter(Number.isFinite);
+    const minimum = Math.min(...values);
+    const maximum = Math.max(...values);
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+    setSummaryText("summary-report-observation", `A total of ${points.length} observations were processed for the selected monitoring period. The computed AQI value is ${latest[parameter]} which falls under the ${categoryName} category.`);
+    setSummaryText("summary-report-total", String(points.length));
+    setSummaryText("summary-report-min", String(minimum));
+    setSummaryText("summary-report-max", String(maximum));
+    setSummaryText("summary-report-average", average.toFixed(1));
+    setSummaryText("summary-report-latest", String(latest[parameter]));
+  }
+
+  /* ------------------------------------------------------------------ *
+   *  POSTER RENDERING (1080 x 1350 shareable advisory image)            *
+   * ------------------------------------------------------------------ */
+  const advisoryDrawPoster = async (points, latest, parameter, category, filterLabel, selectedStation, graphMaximum) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080; canvas.height = 1350;
+    const context = canvas.getContext("2d");
+    const loadImage = source => new Promise(resolve => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => resolve(null);
+      image.src = source;
+    });
+    const [background, denrLogo, bagongLogo] = await Promise.all([
+      loadImage("New Background.png"), loadImage("DENR LOGO.png"), loadImage("New Bagong Pilipinas.png")
+    ]);
+    if (background?.naturalWidth) {
+      const scale = Math.min(canvas.width / background.naturalWidth, canvas.height / background.naturalHeight);
+      const width = background.naturalWidth * scale, height = background.naturalHeight * scale;
+      context.drawImage(background, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+    } else {
+      context.fillStyle = "#164b70"; context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    const drawContain = (image, x, y, width, height) => {
+      if (!image?.naturalWidth) return;
+      const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+      const drawWidth = image.naturalWidth * scale, drawHeight = image.naturalHeight * scale;
+      context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
+    };
+    const logoSize = 118, logoGap = 10;
+    const logoGroupWidth = logoSize * 2 + logoGap;
+    const logoY = 16, logoX = (canvas.width - logoGroupWidth) / 2;
+    drawContain(denrLogo, logoX, logoY, logoSize, logoSize);
+    drawContain(bagongLogo, logoX + logoSize + logoGap, logoY, logoSize, logoSize);
+    context.textAlign = "center";
+    context.fillStyle = "#FFD400";
+    context.font = "900 58px Segoe UI, Arial";
+    context.shadowColor = "rgba(0,0,0,.35)"; context.shadowBlur = 8; context.shadowOffsetY = 4;
+    context.fillText("PUBLIC SERVICE ADVISORY", 540, 188);
+    context.shadowColor = "transparent"; context.shadowBlur = 0; context.shadowOffsetY = 0;
+    context.fillStyle = "#fff";
+    context.font = "800 36px Segoe UI, Arial";
+    context.fillText("AIR QUALITY MONITORING", 540, 237);
+    context.fillStyle = "#fff"; context.fillRect(0, 260, 1080, 68);
+    context.fillStyle = "#10346b";
+    context.font = "900 27px Segoe UI, Arial";
+    context.fillText(filterLabel, 540, 303);
+    context.fillStyle = "rgba(10,39,76,.86)"; context.fillRect(0, 328, 1080, 70);
+    context.fillStyle = "#fff";
+    context.font = "900 34px Segoe UI, Arial";
+    context.fillText("📍 CENTRAL VISAYAS", 540, 373);
+    context.fillStyle = "#fff"; context.fillRect(70, 418, 940, 310);
+    context.fillStyle = "#17324d";
+    context.font = "900 28px Segoe UI, Arial";
+    const stationTitle = getStationDisplayTitle(selectedStation);
+    const parameterTitle = getParameterTitle(parameter);
+    advisoryText(context, stationTitle, 540, 472, 860, 36);
+    context.font = "700 19px Segoe UI, Arial";
+    context.fillText("(REAL-TIME PARTICULATE MATTER STATION)", 540, 541);
+    const tableLeft = 104, tableTop = 578, tableWidth = 872, headerHeight = 52, dataHeight = 80;
+    const colWidths = [244, 192, 436];
+    const drawCenteredCellText = (text, x, y, width, height, font, color) => {
+      context.save();
+      context.font = font; context.fillStyle = color; context.textAlign = "center"; context.textBaseline = "middle";
+      context.beginPath(); context.rect(x + 2, y + 2, width - 4, height - 4); context.clip();
+      const words = String(text || "").split(/\s+/);
+      const lines = []; let line = "";
+      words.forEach(word => {
+        const candidate = line ? `${line} ${word}` : word;
+        if (line && context.measureText(candidate).width > width - 24) { lines.push(line); line = word; }
+        else line = candidate;
+      });
+      if (line) lines.push(line);
+      const lineHeight = Math.max(22, parseInt(font.match(/\d+/)?.[0] || "18", 10) + 5);
+      const startY = y + height / 2 - ((lines.length - 1) * lineHeight) / 2;
+      lines.forEach((entry, index) => context.fillText(entry, x + width / 2, startY + index * lineHeight));
+      context.restore();
+    };
+    context.fillStyle = "#8A8A8A"; context.fillRect(tableLeft, tableTop, tableWidth, headerHeight);
+    context.fillStyle = advisoryPreviewCategoryColor(category); context.fillRect(tableLeft, tableTop + headerHeight, tableWidth, dataHeight);
+    context.strokeStyle = "#fff"; context.lineWidth = 2;
+    context.strokeRect(tableLeft, tableTop, tableWidth, headerHeight + dataHeight);
+    context.beginPath();
+    context.moveTo(tableLeft + colWidths[0], tableTop); context.lineTo(tableLeft + colWidths[0], tableTop + headerHeight + dataHeight);
+    context.moveTo(tableLeft + colWidths[0] + colWidths[1], tableTop); context.lineTo(tableLeft + colWidths[0] + colWidths[1], tableTop + headerHeight + dataHeight);
+    context.moveTo(tableLeft, tableTop + headerHeight); context.lineTo(tableLeft + tableWidth, tableTop + headerHeight);
+    context.stroke();
+    ["PARAMETER", "AQI VALUE", "REMARKS"].forEach((label, index) => {
+      const x = tableLeft + colWidths.slice(0, index).reduce((sum, width) => sum + width, 0);
+      drawCenteredCellText(label, x, tableTop, colWidths[index], headerHeight, "900 17px Segoe UI, Arial", "#fff");
+    });
+    const remark = normalizeAqiRemark(latest[parameter === "pm25" ? "remarks25" : "remarks10"]) || category?.name || "NO CATEGORY";
+    const dataTextColor = advisoryPreviewCategoryFontColor(category);
+    drawCenteredCellText(formatPollutant(parameter), tableLeft, tableTop + headerHeight, colWidths[0], dataHeight, "700 25px Segoe UI, Arial", dataTextColor);
+    drawCenteredCellText(String(latest[parameter]), tableLeft + colWidths[0], tableTop + headerHeight, colWidths[1], dataHeight, "700 25px Segoe UI, Arial", dataTextColor);
+    const remarkCellX = tableLeft + colWidths[0] + colWidths[1];
+    const remarkLines = remark.toUpperCase() === "UNHEALTHY FOR SENSITIVE GROUPS" ? ["UNHEALTHY FOR", "SENSITIVE GROUPS"] : [remark.toUpperCase()];
+    context.save();
+    context.beginPath(); context.rect(remarkCellX + 2, tableTop + headerHeight + 2, colWidths[2] - 4, dataHeight - 4); context.clip();
+    context.font = "700 25px Segoe UI, Arial"; context.fillStyle = dataTextColor; context.textAlign = "center"; context.textBaseline = "middle";
+    const remarkLineHeight = 30;
+    const remarkStartY = tableTop + headerHeight + dataHeight / 2 - ((remarkLines.length - 1) * remarkLineHeight) / 2;
+    remarkLines.forEach((line, index) => context.fillText(line, remarkCellX + colWidths[2] / 2, remarkStartY + index * remarkLineHeight));
+    context.restore();
+    context.textAlign = "left"; context.fillStyle = "#fff";
+    context.font = "900 19px Segoe UI, Arial";
+    context.fillText("AQI LEGEND", 88, 754);
+    aqiCategories.forEach((entry, index) => {
+      const x = 98 + (index % 2) * 470;
+      const y = 794 + Math.floor(index / 2) * 39;
+      context.fillStyle = advisoryPreviewCategoryColor(entry);
+      context.beginPath(); context.arc(x + 9, y - 7, 9, 0, Math.PI * 2); context.fill();
+      context.fillStyle = "#FFFFFF"; context.font = "700 15px Segoe UI, Arial";
+      context.fillText(`${entry.name.toUpperCase()} (${entry.range.replace("1–50", "0–50")})`, x + 27, y);
+    });
+    context.fillStyle = "#fff"; context.fillRect(70, 911, 940, 415);
+    context.fillStyle = "#17324d"; context.textAlign = "center";
+    context.font = "900 25px Segoe UI, Arial";
+    advisoryText(context, stationTitle, 540, 950, 860, 28);
+    context.font = "700 16px Segoe UI, Arial";
+    context.fillText(`${parameterTitle} AQI TREND`, 540, 977);
+    const left = 150, right = 936, top = 1016, bottom = 1236;
+    const max = graphMaximum;
+    const xFor = index => left + (points.length === 1 ? (right - left) / 2 : index * (right - left) / (points.length - 1));
+    const yFor = value => bottom - value / max * (bottom - top);
+    context.textAlign = "left"; context.font = "700 15px Segoe UI, Arial";
+    const tickValues = [];
+    for (let value = 0; value <= max; value += 50) tickValues.push(value);
+    if (tickValues.at(-1) !== max) tickValues.push(max);
+    tickValues.forEach(value => {
+      const y = yFor(value);
+      context.strokeStyle = "#dceaf3"; context.lineWidth = 1;
+      context.beginPath(); context.moveTo(left, y); context.lineTo(right, y); context.stroke();
+      context.fillStyle = "#60778b"; context.fillText(String(value), 108, y + 5);
+    });
+    if (max >= 100) {
+      context.strokeStyle = "#FF0000"; context.lineWidth = 3;
+      context.beginPath(); context.moveTo(left, yFor(100)); context.lineTo(right, yFor(100)); context.stroke();
+    }
+    context.save();
+    context.beginPath(); context.rect(left, top, right - left, bottom - top); context.clip();
+    context.strokeStyle = "#087cc1"; context.lineWidth = 3;
+    context.beginPath();
+    points.forEach((item, index) => index ? context.lineTo(xFor(index), yFor(item[parameter])) : context.moveTo(xFor(index), yFor(item[parameter])));
+    context.stroke();
+    context.fillStyle = "#087cc1";
+    points.forEach((item, index) => { context.beginPath(); context.arc(xFor(index), yFor(item[parameter]), 6, 0, Math.PI * 2); context.fill(); });
+    context.restore();
+    context.fillStyle = "#17324d"; context.font = "700 14px Segoe UI, Arial"; context.textAlign = "center";
+    points.forEach((item, index) => {
+      if (advisoryPeriod.value === "24" || index % Math.max(1, Math.ceil(points.length / 6)) === 0 || index === points.length - 1) {
+        const date = new Date(item.timestamp);
+        const hours = date.getHours(), minutes = date.getMinutes();
+        const hour = hours % 12 || 12;
+        const suffix = hours < 12 ? "am" : "pm";
+        const timeSuffix = minutes === 0 && hours === 0 ? "mn" : minutes === 0 && hours === 12 ? "nn" : suffix;
+        const label = advisoryPeriod.value === "24"
+          ? `${hour}${minutes ? `:${String(minutes).padStart(2, "0")}` : ""}${timeSuffix}`
+          : date.toLocaleDateString([], {month: "short", day: "numeric"});
+        context.save(); context.translate(xFor(index), 1264); context.rotate(-Math.PI / 4); context.fillText(label, 0, 0); context.restore();
+      }
+    });
+    context.font = "700 14px Segoe UI, Arial";
+    const firstLegendLabel = `${parameterTitle} AQI`;
+    const secondLegendLabel = `${parameterTitle} AQI SAFE LIMIT (100 AQI)`;
+    const legendGap = 40, legendItemWidth = 26 + 9;
+    const legendWidth = legendItemWidth + context.measureText(firstLegendLabel).width + legendGap + legendItemWidth + context.measureText(secondLegendLabel).width;
+    let legendX = 540 - legendWidth / 2;
+    context.textAlign = "left";
+    context.fillStyle = "#087cc1"; context.fillRect(legendX, 1296, 26, 5);
+    context.fillStyle = "#17324d"; context.fillText(firstLegendLabel, legendX + 35, 1301);
+    legendX += legendItemWidth + context.measureText(firstLegendLabel).width + legendGap;
+    context.fillStyle = "#FF0000"; context.fillRect(legendX, 1296, 26, 5);
+    context.fillStyle = "#17324d"; context.fillText(secondLegendLabel, legendX + 35, 1301);
+    return canvas;
+  };
+
+  async function renderAdvisory() {
+    if (!advisoryStation.value) return;
+    const renderSequence = ++advisoryRenderSequence;
+    const points = advisorySelectedRecords();
+    advisoryDownload.disabled = true;
+    document.getElementById("advisory-log-download").disabled = true;
+    if (!points.length) {
+      advisoryPreview.innerHTML = '<div class="advisory-empty advisory-error">NO CONTINUOUS MONITORING DATA AVAILABLE<br><small>No actual source observations were found for the selected station, parameter, and time range.</small></div>';
+      updateAdvisorySummary([], null, null, advisoryStation.value, advisoryParameter.value, advisoryFilterLabel([]));
+      advisoryCanvas = null;
+      currentAdvisoryStats = null;
+      return;
+    }
+    const latest = points.at(-1);
+    const category = categoryForValue(latest[advisoryParameter.value]);
+    const filterLabel = advisoryFilterLabel(points);
+    const selectedStation = advisoryStation.value;
+    updateAdvisorySummary(points, latest, category, selectedStation, advisoryParameter.value, filterLabel);
+    const renderedCanvas = await advisoryDrawPoster(points, latest, advisoryParameter.value, category, filterLabel, selectedStation, advisoryGraphMaximum());
+    if (renderSequence !== advisoryRenderSequence) return;
+    advisoryCanvas = renderedCanvas;
+    currentAdvisoryStats = {
+      station: selectedStation,
+      parameter: advisoryParameter.value,
+      parameterTitle: getParameterTitle(advisoryParameter.value),
+      period: advisoryPeriod.options[advisoryPeriod.selectedIndex]?.textContent || "",
+      dateRange: filterLabel,
+      latestAqi: latest[advisoryParameter.value],
+      category: category?.name || "No current observation",
+      records: points.length,
+      generatedAt: new Date().toISOString()
+    };
+    advisoryPreview.innerHTML = "";
+    const image = document.createElement("img");
+    image.alt = "Generated DENR-EMB Central Visayas Public Service Advisory";
+    image.draggable = false;
+    image.src = advisoryCanvas.toDataURL("image/png");
+    advisoryPreview.appendChild(image);
+    advisoryDownload.disabled = false;
+    document.getElementById("advisory-log-download").disabled = advisoryLog.length === 0;
+  }
+
+  function refreshAdvisoryControls(resetDates = false) {
+    const names = [...new Set(advisoryRecords().map(item => item.station))].sort();
+    const previous = advisoryStation.value;
+    advisoryStation.innerHTML = names.length ? names.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("") : '<option value="">No continuous stations available</option>';
+    advisoryStation.value = names.includes(previous) ? previous : names[0] || "";
+    const source = advisoryRecords().filter(item => item.station === advisoryStation.value && Number.isFinite(item[advisoryParameter.value]) && item.timestamp).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const latest = source.at(-1);
+    if (latest && (resetDates || !advisoryStart.value || !advisoryEnd.value)) {
+      const days = advisoryPeriod.value === "24" ? 1 : Number(advisoryPeriod.value);
+      advisoryEnd.value = advisoryDateInput(new Date(latest.timestamp));
+      advisoryStart.value = advisoryDateInput(new Date(new Date(latest.timestamp).getTime() - days * 86400000));
+    }
+    renderAdvisory();
+  }
+
+  advisoryStation.addEventListener("change", () => refreshAdvisoryControls(true));
+  advisoryParameter.addEventListener("change", () => refreshAdvisoryControls(true));
+  advisoryPeriod.addEventListener("change", () => refreshAdvisoryControls(true));
+  advisoryGraphRange.addEventListener("change", () => { updateAdvisoryGraphRangeInput(); renderAdvisory(); });
+  advisoryGraphRangeCustom.addEventListener("input", () => { updateAdvisoryGraphRangeInput(); renderAdvisory(); });
+  [advisoryStart, advisoryEnd].forEach(control => control.addEventListener("change", renderAdvisory));
+  updateAdvisoryGraphRangeInput();
+  document.getElementById("advisory-generate").addEventListener("click", () => { renderAdvisory().then(recordAdvisoryLog); });
+  advisoryPreview.addEventListener("contextmenu", event => event.preventDefault());
+  advisoryPreview.addEventListener("dragstart", event => event.preventDefault());
+  advisoryPreview.addEventListener("selectstart", event => event.preventDefault());
+
+  /* ------------------------------------------------------------------ *
+   *  DOWNLOAD PUBLIC SERVICE ADVISORY (administrator login required)     *
+   * ------------------------------------------------------------------ */
+  advisoryDownload.addEventListener("click", async () => {
+    if (!advisoryCanvas || !window.aqmsAdminAccess.ensure()) return;
+    await renderAdvisory();
+    if (!advisoryCanvas) return;
+    const stationSlug = advisoryStation.value.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toUpperCase();
+    const date = advisoryEnd.value ? advisoryEnd.value.slice(0, 10) : "LATEST";
+    const link = document.createElement("a");
+    link.download = `DENR-EMB-CV-PUBLIC-SERVICE-ADVISORY-${stationSlug}-${advisoryParameter.value.toUpperCase()}-${date}.png`;
+    link.href = advisoryCanvas.toDataURL("image/png");
+    link.click();
+    if (currentAdvisoryStats) {
+      const entry = advisoryLog.find(item => item.generatedAt === currentAdvisoryStats.generatedAt && item.station === currentAdvisoryStats.station);
+      if (entry) { entry.downloaded = true; entry.downloadedAt = new Date().toISOString(); renderAdvisoryLog(); }
+    }
+  });
+
+  /* ------------------------------------------------------------------ *
+   *  ADVISORY GENERATION LOG                                             *
+   * ------------------------------------------------------------------ */
+  const ADVISORY_LOG_KEY = "aqms-public-service-advisory-log";
+  let advisoryLog = [];
+  try { advisoryLog = JSON.parse(localStorage.getItem(ADVISORY_LOG_KEY) || "[]"); } catch { advisoryLog = []; }
+  if (!Array.isArray(advisoryLog)) advisoryLog = [];
+
+  function persistAdvisoryLog() {
+    try { localStorage.setItem(ADVISORY_LOG_KEY, JSON.stringify(advisoryLog.slice(0, 100))); } catch { /* storage unavailable */ }
+  }
+  function recordAdvisoryLog() {
+    if (!currentAdvisoryStats) return;
+    const last = advisoryLog[0];
+    if (last && last.generatedAt === currentAdvisoryStats.generatedAt && last.station === currentAdvisoryStats.station) return;
+    advisoryLog.unshift({...currentAdvisoryStats, downloaded: false, downloadedAt: ""});
+    advisoryLog = advisoryLog.slice(0, 100);
+    persistAdvisoryLog();
+    renderAdvisoryLog();
+  }
+  function renderAdvisoryLog() {
+    const body = document.getElementById("advisory-log-body");
+    const count = document.getElementById("advisory-log-count");
+    count.textContent = advisoryLog.length ? `· ${advisoryLog.length} ${advisoryLog.length === 1 ? "entry" : "entries"}` : "";
+    document.getElementById("advisory-log-download").disabled = advisoryLog.length === 0;
+    if (!advisoryLog.length) {
+      body.innerHTML = '<tr><td colspan="9" class="no-data">No advisories generated yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = advisoryLog.map((entry, index) => {
+      const when = new Date(entry.generatedAt).toLocaleString([], {year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", second: "2-digit"});
+      return `<tr><td>${index + 1}</td><td>${escapeHtml(when)}</td><td>${escapeHtml(entry.station)}</td><td>${escapeHtml(entry.parameterTitle || entry.parameter)}</td><td>${escapeHtml(entry.period)}</td><td>${escapeHtml(entry.latestAqi)}</td><td>${escapeHtml(entry.category)}</td><td>${escapeHtml(entry.records)}</td><td>${entry.downloaded ? "✓ Yes" : "—"}</td></tr>`;
+    }).join("");
+  }
+  document.getElementById("advisory-log-clear").addEventListener("click", () => {
+    advisoryLog = [];
+    persistAdvisoryLog();
+    renderAdvisoryLog();
+  });
+  document.getElementById("advisory-log-download").addEventListener("click", () => {
+    if (!window.aqmsAdminAccess.ensure()) return;
+    if (!advisoryLog.length) return;
+    const header = ["Generated", "Station", "Parameter", "Trend Period", "Date Range", "Latest AQI", "Category", "Records", "Downloaded", "Downloaded At"];
+    const csvEscape = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const rows = advisoryLog.map(entry => [
+      new Date(entry.generatedAt).toISOString(), entry.station, entry.parameterTitle || entry.parameter, entry.period,
+      entry.dateRange, entry.latestAqi, entry.category, entry.records,
+      entry.downloaded ? "Yes" : "No", entry.downloadedAt ? new Date(entry.downloadedAt).toISOString() : ""
+    ].map(csvEscape).join(","));
+    const csv = [header.map(csvEscape).join(","), ...rows].join("\r\n");
+    const blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `DENR-EMB-CV-PUBLIC-SERVICE-ADVISORY-LOG-${toDateKey(new Date())}.csv`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  });
+  renderAdvisoryLog();
+
+  /* ------------------------------------------------------------------ *
+   *  ADMINISTRATOR LOGIN (same credentials as the main AQMS app)         *
+   * ------------------------------------------------------------------ */
+  const ADMIN_USERNAME = "DENREMB7";
+  const ADMIN_PASSWORD = "aqmsemb7";
+  const sessionKey = "aqms-advisory-admin-authenticated";
+  const modal = document.getElementById("aqms-admin-modal");
+  const form = document.getElementById("aqms-admin-form");
+  const error = document.getElementById("aqms-admin-error");
+  const status = document.getElementById("advisory-admin-status");
+  const loginButton = document.getElementById("advisory-admin-login");
+  const closeButton = document.getElementById("aqms-admin-close");
+  const isAuthenticated = () => sessionStorage.getItem(sessionKey) === "true";
+  const updateStatus = () => {
+    const authenticated = isAuthenticated();
+    status.firstChild.textContent = authenticated ? "✓ Administrator access enabled " : "🔒 Administrator login required to download ";
+    loginButton.textContent = authenticated ? "LOG OUT" : "LOG IN";
+  };
+  const closeModal = () => { modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); form.reset(); error.textContent = ""; };
+  const openModal = () => { modal.classList.add("open"); modal.setAttribute("aria-hidden", "false"); document.getElementById("aqms-admin-username").focus(); };
+  window.aqmsAdminAccess = { ensure: () => { if (isAuthenticated()) return true; openModal(); return false; } };
+  loginButton.addEventListener("click", () => {
+    if (isAuthenticated()) { sessionStorage.removeItem(sessionKey); updateStatus(); return; }
+    openModal();
+  });
+  closeButton.addEventListener("click", closeModal);
+  modal.addEventListener("click", event => { if (event.target === modal) closeModal(); });
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    const username = document.getElementById("aqms-admin-username").value;
+    const password = document.getElementById("aqms-admin-password").value;
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      sessionStorage.setItem(sessionKey, "true");
+      updateStatus(); closeModal();
+      return;
+    }
+    error.textContent = "Invalid administrator username or password.";
+  });
+  document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.classList.contains("open")) closeModal(); });
+  updateStatus();
+
+  /* ------------------------------------------------------------------ *
+   *  BOOT                                                                *
+   * ------------------------------------------------------------------ */
+  refreshLiveData();
+  setInterval(refreshLiveData, REFRESH_INTERVAL);
+})();
+</script>
+</body>
+</html>
